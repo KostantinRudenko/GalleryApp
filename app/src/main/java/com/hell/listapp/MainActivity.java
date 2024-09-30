@@ -1,7 +1,11 @@
 
 package com.hell.listapp;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.READ_MEDIA_IMAGES;
+
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,12 +20,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private ListView LV;
     private final String [] names = new String[] {"Alex", "Bobr", "Dan"};
 
-    private final String READ_IMAGES_PERMISSION = "android.permission.READ_MEDIA_IMAGES";
     private final int GALLERY_PERMISSION_CODE = 100;
 
     @Override
@@ -36,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void askForPermission()
     {
-        if (ContextCompat.checkSelfPermission(this, READ_IMAGES_PERMISSION)
+        if (ContextCompat.checkSelfPermission(this, READ_MEDIA_IMAGES)
                 == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this,
-                    new String[] {READ_IMAGES_PERMISSION}, GALLERY_PERMISSION_CODE);
+                    new String[] {READ_MEDIA_IMAGES}, GALLERY_PERMISSION_CODE);
         } else {
             Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
         }
@@ -63,18 +68,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void list(){
         LV = (ListView)findViewById(R.id.ListView);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.names, names);
+        ArrayList<String> arr = getImages();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.text, arr);
         LV.setAdapter(adapter);
     }
 
-    public void getImages()
+    public ArrayList<String> getImages()
     {
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         ContentResolver cr = getContentResolver();
-
         String[] projection = {MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME};
 
         Cursor cursor = cr.query(uri, projection, null, null, null);
+
+        ArrayList<String> res = new ArrayList<String>();
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
@@ -84,11 +91,12 @@ public class MainActivity extends AppCompatActivity {
                 long id = cursor.getLong(idColumn);
                 String name = cursor.getString(nameColumn);
 
-                Uri imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
+                //Uri imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
 
-                Toast.makeText(this, "Image: " + name + " URI: " + imageUri.toString(), Toast.LENGTH_SHORT).show();
+                res.add(name);
             }
             cursor.close();
         }
+        return res;
     }
 }
