@@ -6,13 +6,19 @@ import static android.Manifest.permission.READ_MEDIA_IMAGES;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -21,6 +27,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -68,12 +76,13 @@ public class MainActivity extends AppCompatActivity {
 
     public void list(){
         LV = (ListView)findViewById(R.id.ListView);
-        ArrayList<String> arr = getImages();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.text, arr);
+        ArrayList<Uri> arr = getImages();
+        ImageAdapter adapter = new ImageAdapter(this, arr);
+
         LV.setAdapter(adapter);
     }
 
-    public ArrayList<String> getImages()
+    public ArrayList<Uri> getImages()
     {
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         ContentResolver cr = getContentResolver();
@@ -81,19 +90,16 @@ public class MainActivity extends AppCompatActivity {
 
         Cursor cursor = cr.query(uri, projection, null, null, null);
 
-        ArrayList<String> res = new ArrayList<String>();
+        ArrayList<Uri> res = new ArrayList<Uri>();
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-                int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-
                 long id = cursor.getLong(idColumn);
-                String name = cursor.getString(nameColumn);
 
-                //Uri imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
+                Uri imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
 
-                res.add(name);
+                res.add(imageUri);
             }
             cursor.close();
         }
