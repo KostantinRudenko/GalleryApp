@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -33,7 +34,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private ListView LV;
-    private final String [] names = new String[] {"Alex", "Bobr", "Dan"};
 
     private final int GALLERY_PERMISSION_CODE = 100;
 
@@ -49,13 +49,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void askForPermission()
     {
-        if (ContextCompat.checkSelfPermission(this, READ_MEDIA_IMAGES)
-                == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[] {READ_MEDIA_IMAGES}, GALLERY_PERMISSION_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            if (ContextCompat.checkSelfPermission(this, READ_MEDIA_IMAGES)
+                    == PackageManager.PERMISSION_DENIED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[] {READ_MEDIA_IMAGES}, GALLERY_PERMISSION_CODE);
+            }
+            else {
+                Toast.makeText(this, "Already grated", Toast.LENGTH_SHORT).show();
+            }
         } else {
-            Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
+            if (ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[] {READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_CODE);
+            }
+            else {
+                Toast.makeText(this, "Already grated", Toast.LENGTH_SHORT).show();
+            }
         }
+        Toast.makeText(this, "Permissions end", Toast.LENGTH_SHORT).show();
     }
 
     @Override
